@@ -176,3 +176,66 @@ iface eth1 inet static
 auto eth0
 iface eth0 inet dhcp
 ```
+
+## Routing
+
+### NewEridu
+```sh
+#A2
+route add -net 10.68.1.192 netmask 255.255.255.248 gw 10.68.1.217
+
+#A3
+route add -net 10.68.1.200 netmask 255.255.255.248 gw 10.68.1.217
+
+#A4
+route add -net 10.68.1.220 netmask 255.255.255.252 gw 10.68.1.217
+
+#A5
+route add -net 10.68.1.128 netmask 255.255.255.192 gw 10.68.1.217
+
+#A7
+route add -net 10.68.0.0 netmask 255.255.255.0 gw 10.68.1.225
+
+#A8
+route add -net 10.68.1.208 netmask 255.255.255.248 gw 10.68.1.225
+
+#A9
+route add -net 10.68.1.0 netmask 255.255.255.128 gw 10.68.1.225
+
+echo 'routing berhasil'
+
+#iptables awal
+IP_ETH0=$(ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source $IP_ETH0
+```
+
+### Six Street
+```sh
+#A4
+route add -net 10.68.1.220 netmask 255.255.255.252 gw 10.68.1.205
+
+#A5
+route add -net 10.68.1.128 netmask 255.255.255.192 gw 10.68.1.205
+
+#A7
+route add -net 10.68.0.0 netmask 255.255.255.0 gw 10.68.1.218
+
+#A8
+route add -net 10.68.1.208 netmask 255.255.255.248 gw 10.68.1.218
+
+#A9
+route add -net 10.68.1.0 netmask 255.255.255.128 gw 10.68.1.218
+
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+apt-get update
+apt install isc-dhcp-relay -y
+
+echo 'SERVERS="10.68.1.196"
+INTERFACES="eth0 eth1 eth2 eth3"
+OPTIONS=""
+' > /etc/default/isc-dhcp-relay
+
+echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+
+service isc-dhcp-relay restart
+```
