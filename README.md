@@ -83,7 +83,7 @@ iface eth0 inet static
 ```
 
 ### Fairy
-``sh
+```sh
 auto eth0
 iface eth0 inet static
   address 10.68.1.196
@@ -93,7 +93,7 @@ iface eth0 inet static
 
 
 ### ScootOutpost
-``sh
+```sh
 auto eth0
 iface eth0 inet static
   address 10.68.1.205
@@ -116,7 +116,7 @@ iface eth0 inet static
 ```
 
 ### OuterRing
-``sh
+```sh
 auto eth0
 iface eth0 inet static
   address 10.68.1.204
