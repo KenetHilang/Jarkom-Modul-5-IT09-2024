@@ -74,7 +74,7 @@ iface eth2 inet static
 ```
 
 ### HDD
-``sh
+```sh
 auto eth0
 iface eth0 inet static
   address 10.68.1.197
