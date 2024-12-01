@@ -38,3 +38,93 @@
 
 ## Configuration
 
+### NewEridu
+```sh
+auto eth0
+iface eth0 inet dhcp
+
+auto eth1
+iface eth1 inet static
+	address 10.68.1.218
+	netmask 255.255.255.252
+
+auto eth2
+iface eth2 inet static
+	address 10.68.1.226
+	netmask 255.255.255.252
+```
+
+### Six Street
+```sh
+auto eth0
+iface eth0 inet static
+  address 10.68.1.217
+  netmask 255.255.255.252
+  getaway 10.68.1.218
+
+auto eth1
+iface eth1 inet static
+	address 10.68.1.198
+	netmask 255.255.255.248
+
+auto eth2
+iface eth2 inet static
+	address 10.68.1.206
+	netmask 255.255.255.248
+```
+
+### HDD
+``sh
+auto eth0
+iface eth0 inet static
+  address 10.68.1.197
+  netmask 255.255.255.248
+  gateway 10.68.1.198
+```
+
+### Fairy
+``sh
+auto eth0
+iface eth0 inet static
+  address 10.68.1.196
+  netmask 255.255.255.248
+  gateway 10.68.1.198
+```
+
+
+### ScootOutpost
+``sh
+auto eth0
+iface eth0 inet static
+  address 10.68.1.205
+  netmask 255.255.255.252
+  gateway 10.68.1.206
+
+auto eth1
+iface eth1 inet static
+  address 10.68.1.222
+  netmask 255.255.255.252
+```
+
+### HollowZero
+```sh
+auto eth0
+iface eth0 inet static
+  address 10.68.1.221
+  netmask 255.255.255.252
+  gateway 10.68.1.222
+```
+
+### OuterRing
+``sh
+auto eth0
+iface eth0 inet static
+  address 10.68.1.204
+  netmask 255.255.255.252
+  gateway 10.68.1.206
+
+auto eth1
+iface eth1 inet static
+  address 10.68.1.190
+  netmask 255.255.255.192
+```
