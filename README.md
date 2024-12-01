@@ -97,7 +97,7 @@ iface eth0 inet static
 auto eth0
 iface eth0 inet static
   address 10.68.1.205
-  netmask 255.255.255.252
+  netmask 255.255.255.248
   gateway 10.68.1.206
 
 auto eth1
@@ -120,11 +120,59 @@ iface eth0 inet static
 auto eth0
 iface eth0 inet static
   address 10.68.1.204
-  netmask 255.255.255.252
+  netmask 255.255.255.248
   gateway 10.68.1.206
 
 auto eth1
 iface eth1 inet static
   address 10.68.1.190
   netmask 255.255.255.192
+```
+
+### LuminaSquare
+```sh
+auto eth0
+iface eth0 inet static
+  address 10.68.1.225
+  netmask 255.255.255.252
+  gateway 10.68.1.224
+
+auto eth1
+iface eth1 inet static
+  address 10.68.0.254
+  netmask 255.255.255.0
+
+auto eth2
+iface eth2 inet static
+  address 10.68.1.214
+  netmask 255.255.255.248
+```
+
+### HIA
+```sh
+auto eth0
+iface eth0 inet static
+  address 10.68.1.213
+  netmask 255.255.255.248
+  gateway 10.68.1.214
+```
+
+### BalletTwins
+```sh
+auto eth0
+iface eth0 inet static
+  address 10.68.1.212
+  netmask 255.255.255.248
+  gateway 10.68.1.214
+
+auto eth1
+iface eth1 inet static
+  address 10.68.1.126
+  netmask 255.255.255.128
+```
+
+### Clients (Caesar, Burnice, Jane, PoliceBoo, Ellen, Lyacon)
+```sh
+auto eth0
+iface eth0 inet dhcp
 ```
