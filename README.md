@@ -239,3 +239,201 @@ echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 
 service isc-dhcp-relay restart
 ```
+
+### OuterRing
+```bash
+#A2
+route add -net 10.68.1.220 netmask 255.255.255.252 gw 10.68.1.206
+
+#A4
+route add -net 10.68.1.192 netmask 255.255.255.252 gw 10.68.1.205
+
+#A7
+route add -net 10.68.0.0 netmask 255.255.255.00 gw 10.68.1.206
+
+#A8
+route add -net 10.68.1.208 netmask 255.255.255.248  gw 10.68.1.206
+
+#A9
+route add -net 10.68.1.0 netmask 255.255.255.128 gw 10.68.1.206
+
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+apt-get update
+apt install isc-dhcp-relay -y
+
+echo 'SERVERS="10.68.1.196"
+INTERFACES="eth0 eth1 eth2 eth3"
+OPTIONS=""
+' > /etc/default/isc-dhcp-relay
+
+echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+
+service isc-dhcp-relay restart
+```
+
+### ScootOutpost
+```bash
+#A2
+route add -net 10.68.1.192 netmask 255.255.255.248 gw 10.68.1.206
+
+#A5
+route add -net 10.68.1.128 netmask 255.255.255.192 gw 10.68.2.204
+
+#A7
+route add -net 10.68.0.0 netmask 255.255.255.0 gw 10.68.2.206
+
+#A8
+route add -net 10.68.1.208 netmask 255.255.255.248 gw 10.68.2.206
+
+#A9
+route add -net 10.68.1.0 netmask 255.255.255.128 gw 10.68.2.206
+
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+```
+
+### Fairy (DHCP Server)
+```bash
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+apt-get update
+apt-get install isc-dhcp-server netcat -y
+
+echo 'INTERFACESv4="eth0"' > /etc/default/isc-dhcp-server
+
+echo '#A5
+subnet 10.68.1.128 netmask 255.255.255.192 {
+        range 10.68.1.129 10.68.1.189;
+        option routers 10.68.1.190; # Gateway
+        option broadcast-address 10.68.1.191;
+        option domain-name-servers 10.68.1.197; #IP HDD
+        default-lease-time 600;
+        max-lease-time 7200;
+}
+
+#A7
+subnet 10.68.0.0 netmask 255.255.255.0 {
+        range 10.68.0.1 10.68.0.253;
+        option routers 10.68.1.254;
+        option broadcast-address 10.68.1.255;
+        option domain-name-servers 10.68.1.197;
+        default-lease-time 600;
+        max-lease-time 7200;
+}
+
+#A9
+subnet 10.68.1.0 netmask 255.255.255.128 {
+        range 10.68.1.1 10.68.1.125;
+        option routers 10.68.1.126;
+        option broadcast-address 10.68.1.127;
+        option domain-name-servers 10.68.1.197;
+        default-lease-time 600;
+        max-lease-time 7200;
+}
+
+subnet 10.68.1.216 netmask 255.255.255.252 {}
+subnet 10.68.1.192 netmask 255.255.255.248 {}
+subnet 10.68.1.220 netmask 255.255.255.252 {}
+subnet 10.68.1.200 netmask 255.255.255.248 {}
+subnet 10.68.1.224 netmask 255.255.255.252 {}
+subnet 10.68.1.208 netmask 255.255.255.248 {}
+' > /etc/dhcp/dhcpd.conf
+
+service isc-dhcp-server restart
+```
+
+### HDD (DNS Server)
+```bash
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+apt-get update
+apt-get install bind9 netcat -y
+
+echo 'options {
+        directory "/var/cache/bind";
+
+        forwarders {
+                192.168.122.1;
+        };
+
+        // dnssec-validation auto;
+        allow-query{any;};
+        auth-nxdomain no;
+        listen-on-v6 { any; };
+}; ' >/etc/bind/named.conf.options
+
+service bind9 restart
+```
+
+### HIA & HollowZero (Apache Worker)
+```bash
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+apt-get update
+apt-get install apache2 netcat -y
+
+service apache2 start
+
+echo 'Welcome to {hostname}' > /var/www/html/index.html
+
+service apache2 restart
+```
+
+### LuminaSquare
+```bash
+#A2
+route add -net 10.68.1.192 netmask 255.255.255.248 gw 10.68.1.226
+
+#A4
+route add -net 10.68.1.220 netmask 255.255.255.252 gw 10.68.1.226
+
+#A5
+route add -net 10.68.1.128 netmask 255.255.255.192 gw 10.68.1.226
+
+#A9
+route add -net 10.68.1.0 netmask 255.255.255.128 gw 10.68.1.212
+
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+apt-get update
+apt install isc-dhcp-relay -y
+
+echo 'SERVERS="10.68.1.196"
+INTERFACES="eth0 eth1 eth2 eth3"
+OPTIONS=""
+' > /etc/default/isc-dhcp-relay
+
+echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+
+service isc-dhcp-relay restart
+```
+
+### BalletTwins
+```bash
+#A2
+route add -net 10.68.1.192 netmask 255.255.255.248 gw 10.68.1.214
+
+#A4
+route add -net 10.68.1.220 netmask 255.255.255.252 gw 10.68.1.214
+
+#A5
+route add -net 10.68.1.128 netmask 255.255.255.252 gw 10.68.1.214
+
+#A7
+route add -net 10.68.0.0 netmask 255.255.255.0 gw 10.68.1.214
+
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+apt-get update
+apt install isc-dhcp-relay -y
+
+echo 'SERVERS="10.68.1.196"
+INTERFACES="eth0 eth1 eth2 eth3"
+OPTIONS=""
+' > /etc/default/isc-dhcp-relay
+
+echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+
+service isc-dhcp-relay restart
+```
+
+## Misi 2
+1. Menyambungkan NewEridu terhubung ke internet menggunakan iptables tanpa MASQUERADE
+
+```bash
+iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source [IP eth0]
+```
