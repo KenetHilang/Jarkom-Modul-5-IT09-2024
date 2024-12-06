@@ -432,8 +432,105 @@ service isc-dhcp-relay restart
 ```
 
 ## Misi 2
-1. Menyambungkan NewEridu terhubung ke internet menggunakan iptables tanpa MASQUERADE
+### 1. Menyambungkan NewEridu terhubung ke internet menggunakan iptables tanpa MASQUERADE
 
 ```bash
 iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source [IP eth0]
 ```
+
+### 2. Agar tidak ada node yang bisa ping ke Fairy tapi Fairy tetap bisa ping ke node lain, lakukan konfigurasi berikut di Fairy
+
+```bash
+iptables -A INPUT -p icmp --icmp-type echo-request -j DROP
+
+iptables -A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT
+```
+
+Kita bisa hapus aturan dengan
+```bash
+iptables -D INPUT -p icmp --icmp-type echo-request -j DROP
+iptables -D OUTPUT -p icmp --icmp-type echo-request -j ACCEPT
+```
+
+### 3. Agar HDD hanya bisa diakses oleh Fairy, lakukan konfigurasi berikut di HDD
+```bash
+iptables -A INPUT -s 10.68.1.196 -j ACCEPT
+
+iptables -A INPUT -j REJECT
+```
+
+Lakukan pengujian dengan menggunakan netcat
+```bash
+#Pada HDD
+nc -l -p 2456
+
+#Pada Fairy
+nc 10.68.1.196 2456
+```
+
+### 4. HollowZero hanya bisa diakses oleh 4 node dan hanya di hari Senin hingga Jumat, gunakan konfigurasi ini di HollowZero
+
+```bash
+iptables -A INPUT -p tcp -s <IP_Burnice> --dport 80 -m time --timestart 00:00 --timestop 23:59 --weekdays Mon,Tue,Wed,Thu,Fri -j ACCEPT
+
+iptables -A INPUT -p tcp -s <IP_Caesar> --dport 80 -m time --timestart 00:00 --timestop 23:59 --weekdays Mon,Tue,Wed,Thu,Fri -j ACCEPT
+
+iptables -A INPUT -p tcp -s <IP_Jane> --dport 80 -m time --timestart 00:00 --timestop 23:59 --weekdays Mon,Tue,Wed,Thu,Fri -j ACCEPT
+
+iptables -A INPUT -p tcp -s <IP_Policeboo> --dport 80 -m time --timestart 00:00 --timestop 23:59 --weekdays Mon,Tue,Wed,Thu,Fri -j ACCEPT
+
+iptables -A INPUT -p tcp --dport 80 -j REJECT
+```
+
+Menggunakan command berikut untuk verifikasi akses
+```bash
+curl http://10.68.1.221
+```
+
+### 5. Konfigurasi agar HIA hanya bisa diakses oleh Ellen dan Lycaon pada pukul 08:00 - 21:00 dan bisa diakses oleh Jane serta Policeboo hanya pada pukul 03:00 - 23:00
+
+```bash
+# Akses Node Ellen dan Lycaon
+iptables -A INPUT -p tcp -s <IP Ellen> --dport 80 -m time --timestart 01:00 --timestop 14:00 --weekdays Mon,Tue,Wed,Thu,Fri,Sat,Sun -j ACCEPT
+
+iptables -A INPUT -p tcp -s <IP Lycaon> --dport 80 -m time --timestart 01:00 --timestop 14:00 --weekdays Mon,Tue,Wed,Thu,Fri,Sat,Sun -j ACCEPT
+
+# Akses Node Jane dan Policeboo
+iptables -A INPUT -p tcp -s <IP Jane> --dport 80 -m time --timestart 20:00 --timestop 16:00 --weekdays Mon,Tue,Wed,Thu,Fri,Sat,Sun -j ACCEPT
+
+iptables -A INPUT -p tcp -s <IP Policeboo> --dport 80 -m time --timestart 20:00 --timestop 16:00 --weekdays Mon,Tue,Wed,Thu,Fri,Sat,Sun -j ACCEPT
+
+# Tolak semua koneksi lainnya
+iptables -A INPUT -p tcp --dport 80 -j REJECT
+```
+
+### 6. Aktivitas di HIA harus dibatasi, HIA harus memblokir aktivitas port scanning yang melebihi 25 port dalam rentang 10 detik, penyerang yang diblokir tidak bisa ping, nc, atau curl ke HIA, log dari iptables akan tercatat untuk analisis.
+
+```bash
+# atur limit
+iptables -N PORTSCAN
+iptables -A INPUT -p tcp --dport 1:100 -m state --state NEW -m recent --set --name portscan
+iptables -A INPUT -p tcp --dport 1:100 -m state --state NEW -m recent --update --seconds 10 --hitcount 25 --name portscan -j PORTSCAN
+
+# Blokir IP
+iptables -A PORTSCAN -m recent --set --name blacklist
+iptables -A PORTSCAN -j DROP
+
+# Blokir semua aktivitas dari IP yang ada di daftar blacklist
+iptables -A INPUT -m recent --name blacklist --rcheck -j REJECT
+iptables -A OUTPUT -m recent --name blacklist --rcheck -j REJECT
+
+# Logging untuk port scanning
+iptables -A PORTSCAN -j LOG --log-prefix='PORT SCAN DETECTED' --log-level 4
+```
+
+### 7. Pada HollowZero ada ketentuan bahwa hanya ada 2 koneksi aktif dari 2 IP berbeda dalam waktu bersamaan yang diperbolehkan, maka dari itu gunakan konfigurasi berikut di HollowZero
+
+```bash
+iptables -A INPUT -p tcp --dport 80 -m conntrack --ctstate NEW -m recent --set
+iptables -A INPUT -p tcp --dport 80 -m conntrack --ctstate NEW -m recent --update --seconds 1 --hitcount 3 -j REJECT
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+```
+
+Lakukan pengujian bersamaan di 4 Node terkait dengan menggunakan `parallel curl -s http://IP-HollowZero ::: IP-Caesar IP-Burnice IP-Jane IP-Policeboo`
+
